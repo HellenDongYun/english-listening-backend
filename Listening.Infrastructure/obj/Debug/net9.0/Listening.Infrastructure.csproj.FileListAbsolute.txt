@@ -1,0 +1,17 @@
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/bin/Debug/net9.0/Listening.Infrastructure.deps.json
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/bin/Debug/net9.0/Listening.Infrastructure.runtimeconfig.json
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/bin/Debug/net9.0/Listening.Infrastructure.dll
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/bin/Debug/net9.0/Listening.Infrastructure.pdb
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/bin/Debug/net9.0/Listening.Domain.dll
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/bin/Debug/net9.0/Listening.Domain.pdb
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listening.Infrastructure.csproj.AssemblyReference.cache
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listening.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listening.Infrastructure.AssemblyInfoInputs.cache
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listening.Infrastructure.AssemblyInfo.cs
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listening.Infrastructure.csproj.CoreCompileInputs.cache
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listenin.BC1B4855.Up2Date
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listening.Infrastructure.dll
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/refint/Listening.Infrastructure.dll
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listening.Infrastructure.pdb
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/Listening.Infrastructure.genruntimeconfig.cache
+/Users/hellendong/Desktop/Listening/Listening.Infrastructure/obj/Debug/net9.0/ref/Listening.Infrastructure.dll

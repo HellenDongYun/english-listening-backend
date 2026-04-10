@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "3ykJ4DSp+qSw9p7oQx8kWStS5Ie9KCtwFkOFd0EXZeo=",
+  "Source": "Listening.WebApi",
+  "BasePath": "_content/Listening.WebApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

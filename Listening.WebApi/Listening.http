@@ -1,0 +1,6 @@
+@Listening_HostAddress = http://localhost:5142
+
+GET {{Listening_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
