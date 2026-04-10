@@ -1,0 +1,29 @@
+/Listening.sln
+# macOS
+.DS_Store
+Icon?
+
+# Rider / JetBrains
+.idea/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# .NET build folders
+bin/
+obj/
+
+# Logs
+*.log
+
+# Publish output
+publish/
+out/
+
+# Local environment config
+appsettings.Development.json
+
+# Optional local secrets
+secrets.json

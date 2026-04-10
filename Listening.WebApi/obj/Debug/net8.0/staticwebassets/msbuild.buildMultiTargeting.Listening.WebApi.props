@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/Listening.WebApi.props" />
-</Project>
