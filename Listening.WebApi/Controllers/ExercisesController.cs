@@ -32,27 +32,35 @@ namespace Listening.Controllers
 
         // POST api/<ExercisesController>
         [HttpPost]
-        public async Task<IActionResult> Create(Guid lessonId,[FromForm] CreateExerciseRequest request)
+        public async Task<IActionResult> Create(Guid lessonId, [FromForm] CreateExerciseRequest request)
         {
+            if (request == null)
+                return BadRequest("Request cannot be null.");
+
+            if (request.AudioFile == null || request.AudioFile.Length == 0)
+                return BadRequest("Audio file is required.");
+
             var command = new CreateExerciseCommand
             {
                 LessonId = lessonId,
                 Title = request.Title,
-                Transcript = request.Transcript,
+                Transcript = request.Transcript?.Trim(),
                 AudioStream = request.AudioFile.OpenReadStream(),
                 FileName = request.AudioFile.FileName,
                 ContentType = request.AudioFile.ContentType,
-                Length = request.AudioFile.Length
+                Length = request.AudioFile.Length,
+                Difficulty = request.Difficulty,
+                DurationSeconds = request.DurationSeconds
             };
+
             var result = await _exerciseService.CreateExerciseAsync(command);
+
             return CreatedAtAction(
-                nameof(GetById), 
-                new { lessonId = result.LessonId, exerciseId = result.Id }, 
+                nameof(GetById),
+                new { lessonId = result.LessonId, exerciseId = result.Id },
                 result
             );
-
         }
-
         [HttpDelete("{exerciseId}")]
         public async Task<IActionResult> Delete(Guid lessonId, Guid exerciseId)
         {

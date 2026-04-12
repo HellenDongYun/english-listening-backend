@@ -5,9 +5,9 @@ namespace Listening.Application.Exercise.Commands;
 public class UpdateExerciseCommand
 {
     public Guid Id { get; set; }
-    
+
     public string Title { get; set; } = string.Empty;
-    
+
     public string Transcript { get; set; } = string.Empty;
 
     /// <summary>
@@ -31,8 +31,12 @@ public class UpdateExerciseCommand
     public string? ContentType { get; set; }
 
     /// <summary>
+    /// 音频文件大小（字节）
+    /// </summary>
+    public long Length { get; set; }
+
+    /// <summary>
     /// 音频时长（用于 ChangeAudio 方法）
     /// </summary>
     public TimeSpan Duration { get; set; }
-    
 }

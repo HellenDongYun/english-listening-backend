@@ -3,34 +3,70 @@ namespace Listening.Domain.Entities;
 public class AudioResource
 {
     public Guid Id { get; private set; }
-    public string FileName { get; private set; }
-    public string ContentType{ get; private set; }
+
+    // 实际保存相对路径或文件名
+    public string FileName { get; private set; } = string.Empty;
+
+    public string ContentType { get; private set; } = string.Empty;
+
     public long Size { get; private set; }
-    private AudioResource() { }
+
+    private AudioResource()
+    {
+        // EF Core
+    }
 
     public AudioResource(string fileName, string contentType, long size)
     {
-        Id= Guid.NewGuid();
-        FileName = fileName;
-        ContentType = contentType;
+        if (string.IsNullOrWhiteSpace(fileName))
+            throw new ArgumentException("File name cannot be empty.", nameof(fileName));
+
+        if (string.IsNullOrWhiteSpace(contentType))
+            throw new ArgumentException("Content type cannot be empty.", nameof(contentType));
+
+        if (size <= 0)
+            throw new ArgumentException("File size must be greater than zero.", nameof(size));
+
+        Id = Guid.NewGuid();
+        FileName = NormalizeFileName(fileName);
+        ContentType = contentType.Trim();
         Size = size;
     }
-    public string GetUrl(string baseUrl)
-    {
-        if (string.IsNullOrWhiteSpace(baseUrl)) return FileName;
 
-        // 清理 baseUrl 结尾的斜杠
+    public void Update(string fileName, string contentType, long size)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            throw new ArgumentException("File name cannot be empty.", nameof(fileName));
+
+        if (string.IsNullOrWhiteSpace(contentType))
+            throw new ArgumentException("Content type cannot be empty.", nameof(contentType));
+
+        if (size <= 0)
+            throw new ArgumentException("File size must be greater than zero.", nameof(size));
+
+        FileName = NormalizeFileName(fileName);
+        ContentType = contentType.Trim();
+        Size = size;
+    }
+
+    public string GetUrl(string? baseUrl)
+    {
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            return FileName;
+
         var cleanedBase = baseUrl.TrimEnd('/');
-        
-        // 清理 FileName 开头的斜杠，并移除多余的 "upload/" 目录（如果你确定物理路径只有 uploads）
         var cleanedFile = FileName.TrimStart('/');
-        
-        // 针对你提到的错误：如果文件名里带了多余的 "upload/"，在这里剔除
-        if (cleanedFile.StartsWith("upload/"))
-        {
-            cleanedFile = cleanedFile.Substring(7); // 移除 "upload/" 这 7 个字符
-        }
 
         return $"{cleanedBase}/{cleanedFile}";
+    }
+
+    private static string NormalizeFileName(string fileName)
+    {
+        var normalized = fileName.Trim().Replace("\\", "/");
+
+        // 去掉开头多余的斜杠
+        normalized = normalized.TrimStart('/');
+
+        return normalized;
     }
 }

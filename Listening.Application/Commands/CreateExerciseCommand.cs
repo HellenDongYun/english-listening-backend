@@ -1,3 +1,5 @@
+using Listening.Domain.Entities;
+
 namespace Listening.Application.Exercise.Commands;
 
 public class CreateExerciseCommand
@@ -18,5 +20,5 @@ public class CreateExerciseCommand
     public double DurationSeconds { get; init; } 
     
     // 难度等级 (1: Easy, 2: Medium, 3: Hard)
-    public int Difficulty { get; init; } 
+    public  DifficultyLevel Difficulty { get; init; } 
 }

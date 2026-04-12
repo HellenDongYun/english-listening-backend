@@ -59,28 +59,19 @@ public class LessonProfile:Profile
         CreateMap<ExerciseCreateDto, Domain.Entities.Exercise>()
             .ConstructUsing((src, ctx) =>
             {
-                // 1. 准备值对象 (Value Objects)
-                // 确保 DTO 中的 Size, FileName, ContentType 已经过验证
                 var audio = new AudioResource(
                     src.FileName,
                     src.ContentType,
                     src.Size
                 );
 
-                // 2. 转换数据类型
-                // 使用 TimeSpan.FromSeconds 显式转换，避免 AutoMapper 自行反射 TimeSpan 类型
                 var duration = TimeSpan.FromSeconds(src.DurationSeconds);
-
-                // 强制类型转换枚举
                 var difficulty = (DifficultyLevel)src.Difficulty;
 
-                // 3. 调用领域实体构造函数
-                // 提示：Guid.Empty 通常在 Service 层由父级 Lesson.AddExercise 自动关联
                 return new Domain.Entities.Exercise(
                     Guid.Empty,
                     src.Title,
                     audio,
-                    src.Transcript,
                     difficulty,
                     duration
                 );

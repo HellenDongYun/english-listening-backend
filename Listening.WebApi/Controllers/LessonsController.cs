@@ -46,36 +46,41 @@ namespace Listening.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Lesson>> CreateLesson([FromBody]CreateLessonRequest request)
+        public async Task<ActionResult<LessonDto>> CreateLesson([FromBody] CreateLessonRequest request)
         {
-            //1. 创建lesson 聚合根
-            var lesson = new Lesson(request.Title,request.Description);
-            // 2. 遍历请求中的练习项
+            var lesson = new Lesson(request.Title, request.Description);
+
             foreach (var exReq in request.Exercises)
             {
-                // A. 首先创建值对象/关联对象 AudioResource
-                var audio = new AudioResource(exReq.FileName, exReq.ContentType, exReq.Size);
-                // 转换时长
+                var audio = new AudioResource(
+                    exReq.FileName,
+                    exReq.ContentType,
+                    exReq.Size
+                );
+
                 var duration = TimeSpan.FromSeconds(exReq.DurationSeconds);
                 var difficulty = (DifficultyLevel)exReq.Difficulty;
-                // B. 创建 Exercise 实体
-                // 注意：传入 lesson.Id 满足你的构造函数定义
+
                 var exercise = new Exercise(
-                    lesson.Id, 
-                    exReq.Title, 
-                    audio, 
-                    exReq.Transcript,
+                    lesson.Id,
+                    exReq.Title,
+                    audio,
                     difficulty,
                     duration
                 );
 
-                // C. 加入聚合
                 lesson.AddExercise(exercise);
             }
-            //3.持久化
+
             await _repo.AddAsync(lesson);
-            //4. 映射并返回结果
-            return CreatedAtAction(nameof(GetLesson), new { lessonId = lesson.Id },_mapper.Map<LessonDto>(lesson));
+
+            var lessonDto = _mapper.Map<LessonDto>(lesson);
+
+            return CreatedAtAction(
+                nameof(GetLesson),
+                new { lessonId = lesson.Id },
+                lessonDto
+            );
         }
 
         [HttpPut("{lessonId}")]
