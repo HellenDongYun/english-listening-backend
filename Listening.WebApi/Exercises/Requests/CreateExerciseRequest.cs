@@ -12,4 +12,5 @@ public class CreateExerciseRequest
     public string FileName { get; set; } = null!;
     public string ContentType { get; set; } = null!;
     public long Size { get; set; }
+    public IFormFile? SubtitleFile { get; set; }
 }

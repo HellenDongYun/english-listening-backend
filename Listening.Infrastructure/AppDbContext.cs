@@ -9,7 +9,7 @@ public class AppDbContext:DbContext
     public DbSet<Exercise> Exercises { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserAccessFail> UserAccessFails { get; set; }
-
+    public DbSet<SubtitleSegment> SubtitleSegments => Set<SubtitleSegment>();
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

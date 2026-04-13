@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Listening.Application\Listening.Application.csproj" />
-    <ProjectReference Include="..\Listening.Domain\Listening.Domain.csproj" />
     <ProjectReference Include="..\Listening.Infrastructure\Listening.Infrastructure.csproj" />
   </ItemGroup>
 

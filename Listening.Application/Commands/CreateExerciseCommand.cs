@@ -21,4 +21,7 @@ public class CreateExerciseCommand
     
     // 难度等级 (1: Easy, 2: Medium, 3: Hard)
     public  DifficultyLevel Difficulty { get; init; } 
+    //字幕
+    public Stream? SubtitleStream { get; init; }
+    public string? SubtitleFileName { get; init; }
 }

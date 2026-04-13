@@ -78,6 +78,7 @@ public class Exercise
     {
         if (segments is null)
             throw new ArgumentNullException(nameof(segments));
+        
 
         var orderedSegments = segments
             .OrderBy(s => s.Sequence)

@@ -50,7 +50,9 @@ namespace Listening.Controllers
                 ContentType = request.AudioFile.ContentType,
                 Length = request.AudioFile.Length,
                 Difficulty = request.Difficulty,
-                DurationSeconds = request.DurationSeconds
+                DurationSeconds = request.DurationSeconds,
+                SubtitleStream = request.SubtitleFile?.OpenReadStream(),
+                SubtitleFileName = request.SubtitleFile?.FileName
             };
 
             var result = await _exerciseService.CreateExerciseAsync(command);

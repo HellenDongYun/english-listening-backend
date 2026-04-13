@@ -27,6 +27,10 @@ namespace Listening.Infrastructure.Migrations
                     b.Property<int>("Difficulty")
                         .HasColumnType("int");
 
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time(6)")
+                        .HasColumnName("Duration");
+
                     b.Property<Guid>("LessonId")
                         .HasColumnType("char(36)");
 
@@ -80,11 +84,24 @@ namespace Listening.Infrastructure.Migrations
                     b.Property<int>("Sequence")
                         .HasColumnType("int");
 
+                    b.Property<TimeSpan>("_endTime")
+                        .HasColumnType("time(6)")
+                        .HasColumnName("EndTime");
+
+                    b.Property<TimeSpan>("_startTime")
+                        .HasColumnType("time(6)")
+                        .HasColumnName("StartTime");
+
+                    b.Property<string>("_text")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("Text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExerciseId");
 
-                    b.ToTable("SubtitleSegment");
+                    b.ToTable("SubtitleSegments", (string)null);
                 });
 
             modelBuilder.Entity("Listening.Domain.Entities.User", b =>
@@ -160,7 +177,8 @@ namespace Listening.Infrastructure.Migrations
                                 .HasColumnName("AudioFileName");
 
                             b1.Property<Guid>("Id")
-                                .HasColumnType("char(36)");
+                                .HasColumnType("char(36)")
+                                .HasColumnName("AudioId");
 
                             b1.Property<long>("Size")
                                 .HasColumnType("bigint")

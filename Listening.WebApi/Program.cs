@@ -4,6 +4,8 @@ using Listening.Infrastructure.Repositories;
 using Listening.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Listening.Application.Exercise;
+using Listening.Application.Interfaces;
+using Listening.Infrastructure.Subtitle;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 
@@ -29,6 +31,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<ILessonRepository, EfLessonRepository>();
 builder.Services.AddSingleton<LocalFileStorage>();
 builder.Services.AddScoped<IFileStorage>(sp => sp.GetRequiredService<LocalFileStorage>());
+builder.Services.AddScoped<ISubtitleParser, SrtSubtitleParser>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Listening.Application.Profiles.LessonProfile).Assembly);

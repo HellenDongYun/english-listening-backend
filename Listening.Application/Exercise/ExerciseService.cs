@@ -1,5 +1,6 @@
 using Listening.Application.Dtos;
 using Listening.Application.Exercise.Commands;
+using Listening.Application.Interfaces;
 using Listening.Domain.Entities;
 
 namespace Listening.Application.Exercise;
@@ -8,6 +9,7 @@ public class ExerciseService
 {
     private readonly ILessonRepository _lessonRepo;
     private readonly IFileStorage _fileStorage;
+    private readonly ISubtitleParser _subtitleParser;
 
     public ExerciseService(
         ILessonRepository lessonRepo,
@@ -35,7 +37,7 @@ public class ExerciseService
         );
 
         var duration = TimeSpan.FromSeconds(cmd.DurationSeconds);
-        var difficulty = (DifficultyLevel)cmd.Difficulty;
+        var difficulty = cmd.Difficulty;
 
         var exercise = new Domain.Entities.Exercise(
             cmd.LessonId,
@@ -44,6 +46,22 @@ public class ExerciseService
             difficulty,
             duration
         );
+
+        // 解析 subtitle 文件并写入 Exercise
+        if (cmd.SubtitleStream != null && !string.IsNullOrWhiteSpace(cmd.SubtitleFileName))
+        {
+            var segments = await _subtitleParser.ParseAsync(cmd.SubtitleStream, cmd.SubtitleFileName);
+
+            foreach (var seg in segments.OrderBy(x => x.Sequence))
+            {
+                exercise.AddSubtitleSegment(
+                    seg.Sequence,
+                    seg.StartTime,
+                    seg.EndTime,
+                    seg.Text
+                );
+            }
+        }
 
         lesson.AddExercise(exercise);
 
