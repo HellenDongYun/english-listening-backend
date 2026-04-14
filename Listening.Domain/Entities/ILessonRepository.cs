@@ -10,5 +10,7 @@ public interface ILessonRepository
     // 分页，列表
     Task<bool> DeleteAsync(Guid lessonId);
     Task UpdateAsync(Lesson lesson);
+    Task<bool> ExistsAsync(Guid lessonId);
+    Task AddExerciseAsync(Exercise exercise);
 
 }

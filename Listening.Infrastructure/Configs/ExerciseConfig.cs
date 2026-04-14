@@ -37,8 +37,7 @@ internal class ExerciseConfig : IEntityTypeConfiguration<Exercise>
 
         builder.OwnsOne(e => e.Audio, ar =>
         {
-            ar.Property(a => a.Id)
-                .HasColumnName("AudioId");
+            ar.Ignore(a => a.Id);
 
             ar.Property(a => a.FileName)
                 .HasColumnName("AudioFileName")

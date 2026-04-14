@@ -44,13 +44,12 @@ namespace Listening.Controllers
             {
                 LessonId = lessonId,
                 Title = request.Title,
-                Transcript = request.Transcript?.Trim(),
                 AudioStream = request.AudioFile.OpenReadStream(),
-                FileName = request.AudioFile.FileName,
-                ContentType = request.AudioFile.ContentType,
+                FileName = request.AudioFile.FileName,  // ✅ 自动获取
+                ContentType = request.AudioFile.ContentType,  // ✅ 自动获取
                 Length = request.AudioFile.Length,
+                // Transcript = request.Transcript?.Trim(),
                 Difficulty = request.Difficulty,
-                DurationSeconds = request.DurationSeconds,
                 SubtitleStream = request.SubtitleFile?.OpenReadStream(),
                 SubtitleFileName = request.SubtitleFile?.FileName
             };

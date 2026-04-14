@@ -22,29 +22,33 @@ public class LessonProfile:Profile
 
         // 配置 Exercise -> ExerciseDto 的映射
         CreateMap<Domain.Entities.Exercise, ExerciseDto>()
-            // 映射基础字段
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.LessonId, opt => opt.MapFrom(src => src.LessonId))
-            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
-            .ForMember(dest => dest.Transcript, opt => opt.MapFrom(src => src.Transcript))
-            .ForMember(dest => dest.Difficulty, opt => opt.MapFrom(src => src.Difficulty))
+            // 基础字段
+            .ForMember(dest => dest.Id, 
+                opt => opt.MapFrom(src => src.Id))
 
-            // TimeSpan → double（秒）
+            .ForMember(dest => dest.LessonId, 
+                opt => opt.MapFrom(src => src.LessonId))
+
+            .ForMember(dest => dest.Title, 
+                opt => opt.MapFrom(src => src.Title))
+
+            .ForMember(dest => dest.Transcript, 
+                opt => opt.MapFrom(src => src.Transcript))
+
+            // enum → int
+            .ForMember(dest => dest.Difficulty, 
+                opt => opt.MapFrom(src => (int)src.Difficulty))
+
+            // TimeSpan → double
             .ForMember(dest => dest.DurationSeconds, 
                 opt => opt.MapFrom(src => src.DurationSeconds))
 
-            // 映射 AudioResource → AudioResourceDto
-            .ForMember(dest => dest.Audio, opt => opt.MapFrom(src => src.Audio))
-
-            // AudioUrl（如果你有文件访问 API）
+            // 音频URL（基于 /uploads 静态目录）
             .ForMember(dest => dest.AudioUrl, 
                 opt => opt.MapFrom(src => 
-                    $"/api/audio/{src.Audio.Id}"));
+                    src.Audio.GetUrl("/uploads")));
 
-
- 
-
-
+        
         // --- 2. 从 创建请求(Request/Dto) 映射到 实体(Entity) [用于写入接口] ---
 
         // 映射 CreateLessonRequest -> Lesson

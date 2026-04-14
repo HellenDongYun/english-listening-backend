@@ -50,36 +50,13 @@ namespace Listening.Controllers
         {
             var lesson = new Lesson(request.Title, request.Description);
 
-            foreach (var exReq in request.Exercises)
-            {
-                var audio = new AudioResource(
-                    exReq.FileName,
-                    exReq.ContentType,
-                    exReq.Size
-                );
-
-                var duration = TimeSpan.FromSeconds(exReq.DurationSeconds);
-                var difficulty = (DifficultyLevel)exReq.Difficulty;
-
-                var exercise = new Exercise(
-                    lesson.Id,
-                    exReq.Title,
-                    audio,
-                    difficulty,
-                    duration
-                );
-
-                lesson.AddExercise(exercise);
-            }
-
             await _repo.AddAsync(lesson);
-
-            var lessonDto = _mapper.Map<LessonDto>(lesson);
+            await _repo.SaveChangesAsync();
 
             return CreatedAtAction(
                 nameof(GetLesson),
                 new { lessonId = lesson.Id },
-                lessonDto
+                _mapper.Map<LessonDto>(lesson)
             );
         }
 

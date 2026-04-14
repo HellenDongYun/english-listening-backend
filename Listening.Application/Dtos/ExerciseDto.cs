@@ -13,7 +13,6 @@ public class ExerciseDto
     public string AudioUrl { get; set; } = null;
 
     public string Transcript { get; set; } = null;
-    public DifficultyLevel Difficulty { get; set; }
+    public int Difficulty { get; set; }
     public double DurationSeconds { get; set; } // 转换为秒方便前端处理
-    public AudioResourceDto Audio { get; set; } = null!;
 } ;

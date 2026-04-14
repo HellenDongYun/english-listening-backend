@@ -29,7 +29,7 @@ public class EfLessonRepository:ILessonRepository
     {
         return await  _db.Lessons
             .Include(l => l.Exercises)
-            .ThenInclude(e => e.Audio)
+            .ThenInclude(e => e.SubtitleSegments)
             .FirstOrDefaultAsync(l => l.Id == lessonId);
     }
 
@@ -47,6 +47,16 @@ public class EfLessonRepository:ILessonRepository
     {
         _db.Lessons.Update(lesson);
         await _db.SaveChangesAsync();
+    }
+
+    public async Task<bool> ExistsAsync(Guid lessonId)
+    {
+        return await _db.Lessons.AnyAsync(l => l.Id == lessonId);
+    }
+
+    public async Task AddExerciseAsync(Exercise exercise)
+    {
+        await _db.Exercises.AddAsync(exercise);
     }
 
     public async Task<bool> DeleteAsync(Guid lessonId)

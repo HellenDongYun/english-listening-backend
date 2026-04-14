@@ -176,10 +176,6 @@ namespace Listening.Infrastructure.Migrations
                                 .HasColumnType("varchar(200)")
                                 .HasColumnName("AudioFileName");
 
-                            b1.Property<Guid>("Id")
-                                .HasColumnType("char(36)")
-                                .HasColumnName("AudioId");
-
                             b1.Property<long>("Size")
                                 .HasColumnType("bigint")
                                 .HasColumnName("AudioSize");

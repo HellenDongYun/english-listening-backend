@@ -2,6 +2,9 @@ using Listening.Application.Dtos;
 using Listening.Application.Exercise.Commands;
 using Listening.Application.Interfaces;
 using Listening.Domain.Entities;
+using TagLib;
+using System.IO;
+using File = System.IO.File;
 
 namespace Listening.Application.Exercise;
 
@@ -13,16 +16,20 @@ public class ExerciseService
 
     public ExerciseService(
         ILessonRepository lessonRepo,
-        IFileStorage fileStorage)
+        IFileStorage fileStorage, ISubtitleParser subtitleParser)
     {
         _lessonRepo = lessonRepo;
         _fileStorage = fileStorage;
+        _subtitleParser = subtitleParser;
     }
 
     public async Task<ExerciseDto> CreateExerciseAsync(CreateExerciseCommand cmd)
     {
-        var lesson = await _lessonRepo.GetByIdAsync(cmd.LessonId)
-                     ?? throw new Exception("Lesson not found");
+        var lessonExists = await _lessonRepo.ExistsAsync(cmd.LessonId);
+        if (!lessonExists)
+            throw new Exception("Lesson not found");
+
+        var duration = GetAudioDuration(cmd.AudioStream, cmd.FileName);
 
         var storedFileName = await _fileStorage.SaveFileAsync(
             cmd.AudioStream,
@@ -36,21 +43,20 @@ public class ExerciseService
             cmd.Length
         );
 
-        var duration = TimeSpan.FromSeconds(cmd.DurationSeconds);
-        var difficulty = cmd.Difficulty;
-
         var exercise = new Domain.Entities.Exercise(
             cmd.LessonId,
             cmd.Title,
             audio,
-            difficulty,
+            cmd.Difficulty,
             duration
         );
 
-        // 解析 subtitle 文件并写入 Exercise
         if (cmd.SubtitleStream != null && !string.IsNullOrWhiteSpace(cmd.SubtitleFileName))
         {
-            var segments = await _subtitleParser.ParseAsync(cmd.SubtitleStream, cmd.SubtitleFileName);
+            var segments = await _subtitleParser.ParseAsync(
+                cmd.SubtitleStream,
+                cmd.SubtitleFileName
+            );
 
             foreach (var seg in segments.OrderBy(x => x.Sequence))
             {
@@ -63,17 +69,18 @@ public class ExerciseService
             }
         }
 
-        lesson.AddExercise(exercise);
-
+        await _lessonRepo.AddExerciseAsync(exercise);
         await _lessonRepo.SaveChangesAsync();
 
         return new ExerciseDto
         {
             Id = exercise.Id,
-            LessonId = lesson.Id,
+            LessonId = exercise.LessonId,
             Title = exercise.Title,
-            AudioUrl = audio.GetUrl(_fileStorage.GetPublicUrl("")),
-            Transcript = exercise.Transcript
+            AudioUrl = exercise.Audio.GetUrl(_fileStorage.GetPublicUrl("")),
+            Transcript = exercise.Transcript,
+            Difficulty = (int)exercise.Difficulty,  
+            DurationSeconds = exercise.DurationSeconds  
         };
     }
 
@@ -154,5 +161,38 @@ public class ExerciseService
         }
 
         await _lessonRepo.SaveChangesAsync();
+    }
+    
+    
+    private static TimeSpan GetAudioDuration(Stream stream, string fileName)
+    {
+        if (!stream.CanSeek)
+            throw new InvalidOperationException("Stream must support seeking.");
+
+        var tempPath = Path.Combine(
+            Path.GetTempPath(),
+            $"{Guid.NewGuid()}{Path.GetExtension(fileName)}"
+        );
+
+        try
+        {
+            stream.Position = 0;
+
+            using (var fs = File.Create(tempPath))
+            {
+                stream.CopyTo(fs);
+            }
+
+            using var tagFile = TagLib.File.Create(tempPath);
+            return tagFile.Properties.Duration;
+        }
+        finally
+        {
+            if (stream.CanSeek)
+                stream.Position = 0;
+
+            if (File.Exists(tempPath))
+                File.Delete(tempPath);
+        }
     }
 }
