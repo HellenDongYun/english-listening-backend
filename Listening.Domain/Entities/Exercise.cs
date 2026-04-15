@@ -72,6 +72,13 @@ public class Exercise
 
         Audio = audio;
         _duration = newDuration;
+
+        ClearSubtitles();
+    }
+    private void ClearSubtitles()
+    {
+        _subtitleSegments.Clear();
+        _transcript = string.Empty;
     }
 
     public void ReplaceSubtitleSegments(IEnumerable<SubtitleSegment> segments)

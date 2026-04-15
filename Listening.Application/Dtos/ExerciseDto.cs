@@ -5,14 +5,18 @@ namespace Listening.Application.Dtos;
 public class ExerciseDto
 {
     public Guid Id { get; set; }
-    
-    public Guid LessonId { get; set; }
-    
-    public string Title { get; set; } = null;
-    
-    public string AudioUrl { get; set; } = null;
 
-    public string Transcript { get; set; } = null;
+    public Guid LessonId { get; set; }
+
+    public string Title { get; set; } = string.Empty;
+
+    public string AudioUrl { get; set; } = string.Empty;
+
+    public string Transcript { get; set; } = string.Empty;
+
     public int Difficulty { get; set; }
-    public double DurationSeconds { get; set; } // 转换为秒方便前端处理
+
+    public double DurationSeconds { get; set; }
+
+    public List<SubtitleSegmentDto> Subtitles { get; set; } = new();
 } ;

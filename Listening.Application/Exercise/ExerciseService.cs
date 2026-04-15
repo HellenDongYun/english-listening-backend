@@ -4,6 +4,7 @@ using Listening.Application.Interfaces;
 using Listening.Domain.Entities;
 using TagLib;
 using System.IO;
+using Listening.Application.Mappings;
 using File = System.IO.File;
 
 namespace Listening.Application.Exercise;
@@ -16,7 +17,8 @@ public class ExerciseService
 
     public ExerciseService(
         ILessonRepository lessonRepo,
-        IFileStorage fileStorage, ISubtitleParser subtitleParser)
+        IFileStorage fileStorage,
+        ISubtitleParser subtitleParser)
     {
         _lessonRepo = lessonRepo;
         _fileStorage = fileStorage;
@@ -72,59 +74,35 @@ public class ExerciseService
         await _lessonRepo.AddExerciseAsync(exercise);
         await _lessonRepo.SaveChangesAsync();
 
-        return new ExerciseDto
-        {
-            Id = exercise.Id,
-            LessonId = exercise.LessonId,
-            Title = exercise.Title,
-            AudioUrl = exercise.Audio.GetUrl(_fileStorage.GetPublicUrl("")),
-            Transcript = exercise.Transcript,
-            Difficulty = (int)exercise.Difficulty,  
-            DurationSeconds = exercise.DurationSeconds  
-        };
+        return exercise.ToDto(_fileStorage.GetPublicUrl(""));
     }
-
     public async Task<ExerciseDto?> GetExerciseByIdAsync(Guid exerciseId)
     {
-        // 1️⃣ 通过 ExerciseId 找到所属 Lesson（聚合根）
         var lesson = await _lessonRepo.FindByExerciseIdAsync(exerciseId);
         if (lesson == null)
             return null;
 
-        // 2️⃣ 从聚合中取 Exercise
         var exercise = lesson.Exercises.FirstOrDefault(e => e.Id == exerciseId);
         if (exercise == null)
             return null;
 
-        // 3️⃣ 映射为 DTO（Application 层职责）
-        return new ExerciseDto
-        {
-            Id = exercise.Id,
-            LessonId = lesson.Id,
-            Title = exercise.Title,
-            Transcript = exercise.Transcript,
-            AudioUrl = exercise.Audio.GetUrl(
-                _fileStorage.GetPublicUrl("")
-            )
-        };
+        return MapToDto(exercise);
     }
 
     public async Task<bool> DeleteExerciseAsync(Guid exerciseId)
     {
-        //1. find exercise and its parent lesson
-        //in DDD, we usually find the aggregate root that contains the entity
         var lesson = await _lessonRepo.FindByExerciseIdAsync(exerciseId);
         if (lesson == null)
             return false;
+
         var exercise = lesson.Exercises.First(e => e.Id == exerciseId);
-        //2.remove physical file
+
         await _fileStorage.DeleteFileAsync(exercise.Audio.FileName);
-        //3. remove from aggregate root
+
         lesson.RemoveExercise(exerciseId);
-        //4. persist
+
         await _lessonRepo.SaveChangesAsync();
         return true;
-
     }
 
     public async Task UpdateExerciseAsync(UpdateExerciseCommand cmd)
@@ -163,7 +141,30 @@ public class ExerciseService
         await _lessonRepo.SaveChangesAsync();
     }
     
-    
+    private ExerciseDto MapToDto(Domain.Entities.Exercise exercise)
+    {
+        return new ExerciseDto
+        {
+            Id = exercise.Id,
+            LessonId = exercise.LessonId,
+            Title = exercise.Title,
+            AudioUrl = exercise.Audio.GetUrl(_fileStorage.GetPublicUrl("")),
+            Transcript = exercise.Transcript,
+            Difficulty = (int)exercise.Difficulty,
+            DurationSeconds = exercise.DurationSeconds,
+            Subtitles = exercise.SubtitleSegments
+                .OrderBy(s => s.Sequence)
+                .Select(s => new SubtitleSegmentDto
+                {
+                    Sequence = s.Sequence,
+                    StartSeconds = s.StartTime.TotalSeconds,
+                    EndSeconds = s.EndTime.TotalSeconds,
+                    Text = s.Text
+                })
+                .ToList()
+        };
+    }
+
     private static TimeSpan GetAudioDuration(Stream stream, string fileName)
     {
         if (!stream.CanSeek)
@@ -195,4 +196,5 @@ public class ExerciseService
                 File.Delete(tempPath);
         }
     }
+
 }

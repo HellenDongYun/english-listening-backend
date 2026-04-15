@@ -27,16 +27,20 @@ public class EfLessonRepository:ILessonRepository
 
     public async Task<Lesson?> GetByIdAsync(Guid lessonId)
     {
-        return await  _db.Lessons
+        return await _db.Lessons
+            .Include(l => l.Exercises)
+            .ThenInclude(e => e.Audio)
             .Include(l => l.Exercises)
             .ThenInclude(e => e.SubtitleSegments)
             .FirstOrDefaultAsync(l => l.Id == lessonId);
     }
 
     public async Task<Lesson?> FindByExerciseIdAsync(Guid exerciseId) => await _db.Lessons
-        .Include(l=>l.Exercises)
-        .ThenInclude(e=>e.Audio)
-        .FirstOrDefaultAsync(l=>l.Exercises.Any(e => e.Id == exerciseId));
+        .Include(l => l.Exercises)
+        .ThenInclude(e => e.Audio)
+        .Include(l => l.Exercises)
+        .ThenInclude(e => e.SubtitleSegments)
+        .FirstOrDefaultAsync(l => l.Exercises.Any(e => e.Id == exerciseId));
 
     public async Task<IEnumerable<Lesson>> GetAllAsync()
     {
