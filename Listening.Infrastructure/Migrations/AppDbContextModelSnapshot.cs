@@ -58,7 +58,10 @@ namespace Listening.Infrastructure.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ImagePath")
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 

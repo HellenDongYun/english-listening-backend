@@ -14,4 +14,6 @@ public class UpdateLessonDto
     // 如果允许修改内容、顺序等，在此处添加字段
     // 不要放 Id, CreateTime 等不该被用户修改的字段
     
+    
+    //public string? ImagePath { get; set; }
 }
