@@ -68,9 +68,10 @@ if (app.Environment.IsDevelopment())
 
 // 静态文件配置
 var provider = new FileExtensionContentTypeProvider();
-provider.Mappings[".m4a"] = "audio/mp4"; // 识别 M4A 音频
+provider.Mappings[".m4a"] = "audio/mp4";
+provider.Mappings[".srt"] = "text/plain";
+provider.Mappings[".vtt"] = "text/vtt";
 
-// 确保 uploads 文件夹物理存在，否则 PhysicalFileProvider 会报错
 var uploadPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
 if (!Directory.Exists(uploadPath))
 {
@@ -83,14 +84,17 @@ app.UseStaticFiles();
 // 自定义静态文件映射 (针对 /uploads 目录)
 app.UseStaticFiles(new StaticFileOptions
 {
-    //明确允许 /uploads 这个物理目录作为 HTTP 静态资源对外暴露
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "uploads")
-    ),
+    // 修改 1：明确使用 uploads 物理目录
+    FileProvider = new PhysicalFileProvider(uploadPath),
+
+    // 修改 2：浏览器访问路径仍然是 /uploads
     RequestPath = "/uploads",
+
+    // 修改 3：把你上面配置的 .m4a 类型真正用起来
+    ContentTypeProvider = provider,
+
     OnPrepareResponse = ctx =>
     {
-        // 为静态文件手动添加 CORS 头
         ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
         ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, HEAD");
         ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Content-Type");

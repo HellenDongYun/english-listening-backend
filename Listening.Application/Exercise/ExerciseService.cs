@@ -55,6 +55,20 @@ public class ExerciseService
 
         if (cmd.SubtitleStream != null && !string.IsNullOrWhiteSpace(cmd.SubtitleFileName))
         {
+            // 修改 1：先把 srt 字幕文件保存到 uploads/subtitles
+            await _fileStorage.SaveFileAsync(
+                cmd.SubtitleStream,
+                cmd.SubtitleFileName,
+                "text/plain"
+            );
+
+            // 修改 2：保存文件后，重置流位置，否则下面解析字幕可能读不到内容
+            if (cmd.SubtitleStream.CanSeek)
+            {
+                cmd.SubtitleStream.Position = 0;
+            }
+
+            // 修改 3：继续解析 srt 内容，并保存到数据库 SubtitleSegments
             var segments = await _subtitleParser.ParseAsync(
                 cmd.SubtitleStream,
                 cmd.SubtitleFileName
@@ -105,41 +119,88 @@ public class ExerciseService
         return true;
     }
 
-    public async Task UpdateExerciseAsync(UpdateExerciseCommand cmd)
+public async Task UpdateExerciseAsync(UpdateExerciseCommand cmd)
+{
+    var exercise = await _lessonRepo.GetExerciseForUpdateAsync(cmd.Id)
+                   ?? throw new Exception("Exercise not found");
+
+    exercise.UpdateBasicInfo(cmd.Title, cmd.Difficulty);
+
+    if (cmd.NewAudioStream != null &&
+        !string.IsNullOrWhiteSpace(cmd.FileName) &&
+        !string.IsNullOrWhiteSpace(cmd.ContentType))
     {
-        var lesson = await _lessonRepo.FindByExerciseIdAsync(cmd.Id)
-                     ?? throw new Exception("Lesson not found");
+        var newDuration = GetAudioDuration(cmd.NewAudioStream, cmd.FileName);
 
-        var exercise = lesson.Exercises.FirstOrDefault(e => e.Id == cmd.Id);
-        if (exercise == null)
-            throw new Exception("Exercise not found");
-
-        exercise.UpdateBasicInfo(
-            cmd.Title,
-            (DifficultyLevel)cmd.Difficulty
-        );
-
-        if (cmd.NewAudioStream != null)
+        if (newDuration <= TimeSpan.Zero)
         {
-            await _fileStorage.DeleteFileAsync(exercise.Audio.FileName);
-
-            var newFileName = await _fileStorage.SaveFileAsync(
-                cmd.NewAudioStream,
-                cmd.FileName,
-                cmd.ContentType
-            );
-
-            var newAudio = new AudioResource(
-                newFileName,
-                cmd.ContentType,
-                cmd.Length > 0 ? cmd.Length : 1
-            );
-
-            exercise.ChangeAudio(newAudio, cmd.Duration);
+            throw new Exception("Could not detect audio duration.");
         }
 
-        await _lessonRepo.SaveChangesAsync();
+        if (cmd.NewAudioStream.CanSeek)
+        {
+            cmd.NewAudioStream.Position = 0;
+        }
+
+        await _fileStorage.DeleteFileAsync(exercise.Audio.FileName);
+
+        var newFileName = await _fileStorage.SaveFileAsync(
+            cmd.NewAudioStream,
+            cmd.FileName,
+            cmd.ContentType
+        );
+
+        var newAudioSize = cmd.NewAudioStream.CanSeek
+            ? cmd.NewAudioStream.Length
+            : 1;
+
+        var newAudio = new AudioResource(
+            newFileName,
+            cmd.ContentType,
+            newAudioSize
+        );
+
+        exercise.ChangeAudio(newAudio, newDuration);
     }
+
+    if (cmd.SubtitleStream != null &&
+        !string.IsNullOrWhiteSpace(cmd.SubtitleFileName))
+    {
+        await _fileStorage.SaveFileAsync(
+            cmd.SubtitleStream,
+            cmd.SubtitleFileName,
+            "text/plain"
+        );
+
+        if (cmd.SubtitleStream.CanSeek)
+        {
+            cmd.SubtitleStream.Position = 0;
+        }
+
+        var parsedSegments = await _subtitleParser.ParseAsync(
+            cmd.SubtitleStream,
+            cmd.SubtitleFileName
+        );
+
+        var newSubtitleSegments = parsedSegments
+            .OrderBy(x => x.Sequence)
+            .Select(x => new SubtitleSegment(
+                exercise.Id,
+                x.Sequence,
+                x.StartTime,
+                x.EndTime,
+                x.Text
+            ))
+            .ToList();
+
+        await _lessonRepo.ReplaceSubtitleSegmentsAsync(
+            exercise.Id,
+            newSubtitleSegments
+        );
+    }
+
+    await _lessonRepo.SaveChangesAsync();
+}
     
     private ExerciseDto MapToDto(Domain.Entities.Exercise exercise)
     {

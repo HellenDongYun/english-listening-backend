@@ -73,21 +73,29 @@ namespace Listening.Controllers
         }
 
         [HttpPut("{exerciseId}")]
-        public async Task<ActionResult> UpdateExercise(Guid exerciseId,[FromForm] UpdateExerciseRequest request )
+        public async Task<ActionResult> UpdateExercise(
+            Guid exerciseId,
+            [FromForm] UpdateExerciseRequest request)
         {
             var cmd = new UpdateExerciseCommand
             {
                 Id = exerciseId,
                 Title = request.Title,
-                Transcript = request.Transcript,
-                // 将 Web 专有对象转为 Stream
+
+                // 音频
                 NewAudioStream = request.AudioFile?.OpenReadStream(),
                 FileName = request.AudioFile?.FileName,
-                ContentType = request.AudioFile?.ContentType
+                ContentType = request.AudioFile?.ContentType,
+                Length = request.AudioFile?.Length ?? 0,
+
+                // 新增字幕文件
+                SubtitleStream = request.SubtitleFile?.OpenReadStream(),
+                SubtitleFileName = request.SubtitleFile?.FileName
             };
+
             await _exerciseService.UpdateExerciseAsync(cmd);
+
             return NoContent();
         }
-
     }
 }

@@ -12,5 +12,6 @@ public interface ILessonRepository
     Task UpdateAsync(Lesson lesson);
     Task<bool> ExistsAsync(Guid lessonId);
     Task AddExerciseAsync(Exercise exercise);
-
+    Task<Exercise?> GetExerciseForUpdateAsync(Guid exerciseId);
+    Task ReplaceSubtitleSegmentsAsync(Guid exerciseId, IEnumerable<SubtitleSegment> segments);
 }

@@ -1,6 +1,7 @@
 using Listening.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace Listening.Infrastructure.Repositories;
 
 public class EfLessonRepository:ILessonRepository
@@ -73,6 +74,25 @@ public class EfLessonRepository:ILessonRepository
         _db.Lessons.Remove(lesson);
         await _db.SaveChangesAsync();
         return true;
+    }
+ 
+    
+    public async Task<Exercise?> GetExerciseForUpdateAsync(Guid exerciseId)
+    {
+        return await _db.Exercises
+            .FirstOrDefaultAsync(e => e.Id == exerciseId);
+    }
+    public async Task ReplaceSubtitleSegmentsAsync(
+        Guid exerciseId,
+        IEnumerable<SubtitleSegment> segments)
+    {
+        await _db.SubtitleSegments
+            .Where(s => s.ExerciseId == exerciseId)
+            .ExecuteDeleteAsync();
+
+        await _db.SubtitleSegments.AddRangeAsync(segments);
+
+        await _db.SaveChangesAsync();
     }
 
 }
